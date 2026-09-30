@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opening Balance Calculator | Street.co.uk</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #12152A;
+    --purple:  #5B4BE7;
+    --purple-hover: #4a3cd4;
+    --lavender:#EEECFD;
+    --white:   #FFFFFF;
+    --surface: #F7F8FC;
+    --border:  #E4E6EF;
+    --text-primary: #12152A;
+    --text-secondary: #5A5E7A;
+    --text-muted: #9296AD;
+    --success: #E6F7EE;
+    --success-text: #1A8A4A;
+    --warning: #FFF8E6;
+    --warning-text: #B07D00;
+    --danger:  #FEF0F2;
+    --danger-border: #F5C2CA;
+    --danger-text: #C0374B;
+    --radius:  10px;
+    --shadow:  0 1px 4px rgba(18,21,42,0.08);
+    --shadow-md: 0 4px 16px rgba(18,21,42,0.10);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--navy);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo-mark {
+    width: 32px; height: 32px;
+    background: var(--purple);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-logo-mark svg { width: 18px; height: 18px; fill: #fff; }
+  .nav-logo-text { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+  .nav-links { display: flex; gap: 4px; list-style: none; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-avatar {
+    width: 32px; height: 32px;
+    background: var(--purple);
+    border-radius: 50%;
+    font-size: 12px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PAGE SHELL */
+  .page-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 24px;
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+  }
+  .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--purple); }
+  .breadcrumb svg { width: 12px; height: 12px; stroke: var(--text-muted); fill: none; }
+  .page-title-row { display: flex; align-items: center; gap: 12px; }
+  .page-icon {
+    width: 40px; height: 40px;
+    background: var(--lavender);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .page-icon svg { width: 20px; height: 20px; stroke: var(--purple); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.4px; }
+  .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-header-icon {
+    width: 32px; height: 32px;
+    background: var(--lavender);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-header-icon svg { width: 16px; height: 16px; stroke: var(--purple); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .card-body { padding: 24px; }
+
+  /* ALERTS */
+  .alert { border-radius: 8px; padding: 14px 16px; display: flex; gap: 12px; margin-bottom: 20px; }
+  .alert.info { background: var(--lavender); border: 1px solid rgba(91,75,231,0.2); }
+  .alert.warn { background: var(--warning); border: 1px solid #EDCB72; }
+  .alert-icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+  .alert.info .alert-icon svg { stroke: var(--purple); }
+  .alert.warn .alert-icon svg { stroke: #B07D00; }
+  .alert-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .alert-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .alert.info .alert-title { color: var(--purple); }
+  .alert.warn .alert-title { color: var(--warning-text); }
+  .alert-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* FORM */
+  .form-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .form-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .form-row:first-child { padding-top: 0; }
+  .form-label { font-size: 13px; font-weight: 600; color: var(--text-primary); padding-top: 11px; }
+  .req { color: var(--danger-text); margin-left: 2px; }
+  .form-control {
+    width: 100%;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--white);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+  }
+  .form-control:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,75,231,0.12); }
+  .form-control::placeholder { color: var(--text-muted); }
+  .form-control.invalid { border-color: var(--danger-text); background: var(--danger); }
+  .form-control.invalid:focus { box-shadow: 0 0 0 3px rgba(192,55,75,0.15); }
+  .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
+  .field-error { display: none; font-size: 12px; font-weight: 600; color: var(--danger-text); margin-top: 5px; }
+  .field-error.visible { display: block; }
+
+  .input-prefix-wrap { position: relative; }
+  .input-prefix {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 38px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: var(--text-muted);
+    border-right: 1px solid var(--border);
+    pointer-events: none;
+    border-radius: 8px 0 0 8px;
+    background: var(--surface);
+  }
+  .input-prefix-wrap .form-control { padding-left: 50px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer;
+    transition: background .15s, box-shadow .15s, transform .08s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--purple); color: #fff; width: 100%; padding: 12px 24px; font-size: 15px; }
+  .btn-primary:hover:not(:disabled) { background: var(--purple-hover); box-shadow: 0 4px 12px rgba(91,75,231,0.3); }
+  .btn-outline {
+    background: var(--white); color: var(--purple);
+    border: 1px solid var(--purple);
+    width: 100%; padding: 11px 24px;
+  }
+  .btn-outline:hover { background: var(--lavender); }
+  .btn-small { padding: 6px 14px; font-size: 12px; background: var(--white); color: var(--danger-text); border: 1px solid var(--danger-border); }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .form-error-summary {
+    display: none;
+    margin-top: 12px;
+    font-size: 13px; font-weight: 600; color: var(--danger-text);
+    text-align: center;
+  }
+  .form-error-summary.visible { display: block; }
+
+  /* SAVE STATUS */
+  .save-status {
+    display: none;
+    align-items: center; gap: 10px;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .save-status.visible { display: flex; }
+  .save-status.saving  { background: var(--lavender); color: var(--purple); border: 1px solid rgba(91,75,231,0.2); }
+  .save-status.saved   { background: var(--success); color: var(--success-text); border: 1px solid #b9e4c9; }
+  .save-status.failed  { background: var(--danger); color: var(--danger-text); border: 1px solid var(--danger-border); }
+  .save-status.changed { background: var(--warning); color: var(--warning-text); border: 1px solid #EDCB72; }
+  .save-status-text { flex: 1; font-weight: 500; }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(91,75,231,0.25); border-top-color: var(--purple);
+    animation: spin .7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESULTS */
+  .results { display: none; }
+  .results.visible { display: block; animation: fadeUp .25s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .result-tile {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--purple); }
+  .result-tile.green::before { background: #1A8A4A; }
+  .result-tile.amber::before { background: #B07D00; }
+  .result-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge-purple { background: var(--lavender); color: var(--purple); }
+  .badge-green  { background: var(--success); color: var(--success-text); }
+  .badge-amber  { background: var(--warning); color: var(--warning-text); }
+  .result-amount { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; margin-bottom: 4px; }
+  .result-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+  .notes-list { list-style: none; padding: 0; }
+  .notes-list li {
+    display: flex; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .notes-list li:last-child { border-bottom: none; }
+  .notes-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--lavender);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .notes-dot svg { width: 10px; height: 10px; stroke: var(--purple); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .section-divider { height: 1px; background: var(--border); margin: 0 0 20px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translate(-50%, 20px);
+    background: var(--navy); color: #fff;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-md);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 200;
+  }
+  .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 700px) {
+    .form-row { grid-template-columns: 1fr; gap: 6px; }
+    .form-label { padding-top: 0; }
+    .result-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .page-header { padding: 20px 20px 16px; }
+    .container { padding: 20px 16px 48px; }
+    .card-body { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 18 L3 18 Z"/></svg>
+    </div>
+    <span class="nav-logo-text">Street</span>
+  </a>
+  <ul class="nav-links"></ul>
+  <div class="nav-right">
+    <div class="nav-avatar">OS</div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="#">Accounting</a>
+    <svg viewBox="0 0 12 12"><polyline points="4,2 8,6 4,10"/></svg>
+    <span>Go-Live</span>
+    <svg viewBox="0 0 12 12"><polyline points="4,2 8,6 4,10"/></svg>
+    <span>Opening Balance Calculator</span>
+  </div>
+  <div class="page-title-row">
+    <div class="page-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div>
+      <div class="page-title">Opening Balance Calculator</div>
+      <div class="page-subtitle">Calculate your suspense account opening balance for a smooth accounting go-live.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- Instructions -->
+  <div class="card">
+    <div class="card-body" style="padding: 18px 24px;">
+      <div class="alert info" style="margin-bottom:0;">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="alert-title">Before you start</div>
+          <div class="alert-text">Complete all sections below. When you click Calculate, your figures are sent to your onboarding specialist automatically. You can also copy the results and paste them into your go-live chat on the project board.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span class="card-title">Section 1: Client Details</span>
+    </div>
+    <div class="card-body">
+      <div class="form-row">
+        <label class="form-label" for="clientName">Client Name<span class="req">*</span></label>
+        <div>
+          <input class="form-control" id="clientName" type="text" placeholder="e.g. Smith &amp; Co Estates" autocomplete="organization" maxlength="200">
+          <div class="field-error" id="err-clientName">Please enter the client name.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="goLiveDate">Go-Live Date<span class="req">*</span></label>
+        <div>
+          <input class="form-control" id="goLiveDate" type="date">
+          <div class="field-error" id="err-goLiveDate">Please enter the go-live date.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="lastReconciledDate">Last Reconciled Date<span class="req">*</span></label>
+        <div>
+          <input class="form-control" id="lastReconciledDate" type="date">
+          <div class="field-error" id="err-lastReconciledDate">Please enter the last reconciled date.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <span class="card-title">Section 2: Opening Balances</span>
+    </div>
+    <div class="card-body">
+      <div class="form-row">
+        <label class="form-label" for="insuredDeposit">Insured Deposit Closing Balance</label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="insuredDeposit" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-hint">From CRM as of 11:59 PM prior to go-live. Enter in Accounting Settings → Bank Accounts → Opening Balance.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="clientAccount">Client Account Closing Balance<span class="req">*</span></label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="clientAccount" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-hint">From bank statement as of 11:59 PM prior to go-live.</div>
+          <div class="field-error" id="err-clientAccount">Please enter a valid Client Account Closing Balance (greater than zero).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <span class="card-title">Section 3: Adjustments</span>
+    </div>
+    <div class="card-body">
+      <div class="alert warn" style="margin-bottom:20px;">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="alert-title">Deductions</div>
+          <div class="alert-text">All amounts entered below will be <strong>deducted</strong> from the client account closing balance.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="balancesInStreet">Balances in Street</label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="balancesInStreet" type="number" placeholder="0.00" step="0.01" value="0">
+          </div>
+          <div class="form-hint">Deduct if held; confirm inclusion in Trial Balance. Anything other than deposit or NRL Tax.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="nrlTax">Non-Resident Landlord (NRL) Tax</label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="nrlTax" type="number" placeholder="0.00" step="0.01" value="0">
+          </div>
+          <div class="form-hint">Deduct if held; confirm inclusion in Trial Balance.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="unreconciledPayments">Unreconciled Payment Groups</label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="unreconciledPayments" type="number" placeholder="0.00" step="0.01" value="0">
+          </div>
+          <div class="form-hint">Deduct if pending payments exist; confirm with client.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="depositsHeld">Deposits Held in Client Account</label>
+        <div>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">£</span>
+            <input class="form-control" id="depositsHeld" type="number" placeholder="0.00" step="0.01" value="0">
+          </div>
+          <div class="form-hint">Deduct if insured or company-let deposits are held in the client account.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculate -->
+  <div class="card">
+    <div class="card-body" style="padding:20px 24px;">
+      <button class="btn btn-primary" id="calcBtn" type="button">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span id="calcBtnText">Calculate Opening Balances</span>
+      </button>
+      <div class="form-error-summary" id="formErrorSummary">Please fix the highlighted fields above before calculating.</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="results">
+
+    <div class="save-status" id="saveStatus" role="status" aria-live="polite">
+      <div class="spinner" id="saveSpinner"></div>
+      <div class="save-status-text" id="saveStatusText"></div>
+      <button class="btn btn-small" id="retryBtn" type="button" style="display:none;">Try again</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="card-title">Section 4: Results</span>
+      </div>
+      <div class="card-body">
+        <div class="result-grid">
+          <div class="result-tile">
+            <div class="result-badge badge-purple">With Reconciliation</div>
+            <div class="result-amount">£<span id="suspenseWith">0.00</span></div>
+            <div class="result-desc">Suspense opening balance if duplicating unreconciled payment groups into Street</div>
+          </div>
+          <div class="result-tile green">
+            <div class="result-badge badge-green">Without Reconciliation</div>
+            <div class="result-amount">£<span id="suspenseWithout">0.00</span></div>
+            <div class="result-desc">Suspense opening balance if NOT duplicating unreconciled payment groups</div>
+          </div>
+          <div class="result-tile amber">
+            <div class="result-badge badge-amber">Client Account Balance</div>
+            <div class="result-amount">£<span id="clientAccountBalance">0.00</span></div>
+            <div class="result-desc">Enter in Company Settings → Accounting</div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" id="copyBtn" type="button" style="margin-bottom:24px;">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Results to Clipboard
+        </button>
+
+        <div class="section-divider"></div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+          <div class="card-header-icon" style="width:28px;height:28px;">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--purple);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--text-primary);">Important Notes</span>
+        </div>
+        <ul class="notes-list">
+          <li>
+            <div class="notes-dot"><svg viewBox="0 0 10 10"><polyline points="2,5 4.5,7.5 8,2.5"/></svg></div>
+            <span><strong>With Reconciliation:</strong> Use this value if you plan to duplicate unreconciled payment groups into Street and reconcile them.</span>
+          </li>
+          <li>
+            <div class="notes-dot"><svg viewBox="0 0 10 10"><polyline points="2,5 4.5,7.5 8,2.5"/></svg></div>
+            <span><strong>Without Reconciliation:</strong> Use this value if you will NOT duplicate unreconciled payment groups. Remember to untick these from your first import list.</span>
+          </li>
+          <li>
+            <div class="notes-dot"><svg viewBox="0 0 10 10"><polyline points="2,5 4.5,7.5 8,2.5"/></svg></div>
+            <span>Your figures are saved automatically when you click Calculate. You can also copy the results above and paste them into your private go-live chat on the project board for your onboarding specialist.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // ------------------------------------------------------------------
+  // SETTINGS
+  // This is the Google Apps Script web app that saves each calculation
+  // to the "Opening Balance Call" tab. If you ever redeploy the script
+  // and get a new URL, paste it in here.
+  // ------------------------------------------------------------------
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzGUqWrtCCNS--0J-V_eLIfdhUIdM68zPMKW0RhxiuEUnFgH8cs70ICzZqOZGxqw_6L/exec';
+
+  const $ = id => document.getElementById(id);
+  let saving = false;
+  let lastPayload = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    $('goLiveDate').value = today;
+    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+    $('lastReconciledDate').value = yest.toISOString().split('T')[0];
+
+    $('calcBtn').addEventListener('click', calculateAndSave);
+    $('copyBtn').addEventListener('click', copyToClipboard);
+    $('retryBtn').addEventListener('click', () => { if (lastPayload) saveToSheet(lastPayload); });
+
+    // Live update of the figures on screen once results are showing (does NOT save again)
+    document.querySelectorAll('input[type="number"]').forEach(el =>
+      el.addEventListener('input', () => {
+        if ($('results').classList.contains('visible')) {
+          renderResults(compute());
+          setStatus('changed', 'You have changed some figures since the last save. Click Calculate Opening Balances again to save the updated figures.');
+        }
+        clearError(el.id);
+      })
+    );
+    ['clientName', 'goLiveDate', 'lastReconciledDate'].forEach(id =>
+      $(id).addEventListener('input', () => clearError(id))
+    );
+    document.querySelectorAll('input').forEach(el =>
+      el.addEventListener('keypress', e => { if (e.key === 'Enter') calculateAndSave(); })
+    );
+  });
+
+  // ---------- helpers ----------
+  function fmt(v) { return parseFloat(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function val(id) { const n = parseFloat($(id).value); return isNaN(n) ? 0 : n; }
+  function round2(n) { return Math.round(n * 100) / 100; }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('visible');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('visible'), 3500);
+  }
+
+  // ---------- validation ----------
+  function setError(id, on) {
+    $(id).classList.toggle('invalid', on);
+    const err = $('err-' + id);
+    if (err) err.classList.toggle('visible', on);
+  }
+  function clearError(id) {
+    setError(id, false);
+    if (!document.querySelector('.form-control.invalid')) $('formErrorSummary').classList.remove('visible');
+  }
+
+  function validate() {
+    const problems = [];
+    if (!$('clientName').value.trim())   problems.push('clientName');
+    if (!$('goLiveDate').value)          problems.push('goLiveDate');
+    if (!$('lastReconciledDate').value)  problems.push('lastReconciledDate');
+    if (!(val('clientAccount') > 0))     problems.push('clientAccount');
+
+    ['clientName', 'goLiveDate', 'lastReconciledDate', 'clientAccount'].forEach(id =>
+      setError(id, problems.indexOf(id) !== -1)
+    );
+    $('formErrorSummary').classList.toggle('visible', problems.length > 0);
+
+    if (problems.length) {
+      const first = $(problems[0]);
+      first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      first.focus({ preventScroll: true });
+      return false;
+    }
+    return true;
+  }
+
+  // ---------- calculation ----------
+  function compute() {
+    const ca  = val('clientAccount');
+    const bis = val('balancesInStreet');
+    const nrl = val('nrlTax');
+    const up  = val('unreconciledPayments');
+    const dep = val('depositsHeld');
+    const withR    = round2(ca - bis - nrl - dep);
+    const withoutR = round2(ca - bis - nrl - up - dep);
+    return { withR, withoutR, clientAccountBalance: withoutR };
+  }
+
+  function renderResults(r) {
+    $('suspenseWith').textContent         = fmt(r.withR);
+    $('suspenseWithout').textContent      = fmt(r.withoutR);
+    $('clientAccountBalance').textContent = fmt(r.clientAccountBalance);
+  }
+
+  // ---------- main action ----------
+  function calculateAndSave() {
+    if (saving) return;
+    if (!validate()) return;
+
+    const r = compute();
+    renderResults(r);
+
+    const results = $('results');
+    const wasHidden = !results.classList.contains('visible');
+    results.classList.add('visible');
+    if (wasHidden) results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    lastPayload = {
+      clientName:           $('clientName').value.trim(),
+      goLiveDate:           $('goLiveDate').value,
+      lastReconciledDate:   $('lastReconciledDate').value,
+      insuredDeposit:       val('insuredDeposit'),
+      clientAccount:        val('clientAccount'),
+      balancesInStreet:     val('balancesInStreet'),
+      nrlTax:               val('nrlTax'),
+      unreconciledPayments: val('unreconciledPayments'),
+      depositsHeld:         val('depositsHeld'),
+      suspenseWithRecon:    r.withR,
+      suspenseWithoutRecon: r.withoutR,
+      clientAccountBalance: r.clientAccountBalance
+    };
+    saveToSheet(lastPayload);
+  }
+
+  // ---------- saving to the spreadsheet ----------
+  function setStatus(type, text, showRetry) {
+    const box = $('saveStatus');
+    box.className = 'save-status visible ' + type;
+    $('saveSpinner').style.display = type === 'saving' ? 'block' : 'none';
+    $('saveStatusText').textContent = text;
+    $('retryBtn').style.display = showRetry ? 'inline-flex' : 'none';
+  }
+
+  async function saveToSheet(payload) {
+    saving = true;
+    $('calcBtn').disabled = true;
+    $('calcBtnText').textContent = 'Saving...';
+    setStatus('saving', 'Saving your figures...');
+
+    try {
+      // text/plain keeps this a "simple" request so the browser does not block it
+      const res = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'The spreadsheet did not accept the figures.');
+      setStatus('saved', 'Saved. Your onboarding specialist can now see these figures.');
+    } catch (err) {
+      setStatus('failed',
+        'We could not save your figures automatically (' + err.message + '). Your results are still correct below. Please try again, or copy the results and paste them into your go-live chat.',
+        true);
+    } finally {
+      saving = false;
+      $('calcBtn').disabled = false;
+      $('calcBtnText').textContent = 'Calculate Opening Balances';
+    }
+  }
+
+  // ---------- copy ----------
+  function copyToClipboard() {
+    const text = `Street.co.uk - Opening Balance Go-Live Calculator
+============================================================
+Client Name:            ${$('clientName').value.trim() || '-'}
+Go-Live Date:           ${$('goLiveDate').value || '-'}
+Last Reconciled Date:   ${$('lastReconciledDate').value || '-'}
+
+Opening Balances
+  Insured Deposit:      £${fmt($('insuredDeposit').value)}
+  Client Account:       £${fmt($('clientAccount').value)}
+
+Adjustments (deductions)
+  Balances in Street:   £${fmt($('balancesInStreet').value)}
+  NRL Tax:              £${fmt($('nrlTax').value)}
+  Unreconciled Pmts:    £${fmt($('unreconciledPayments').value)}
+  Deposits in Client:   £${fmt($('depositsHeld').value)}
+
+Results
+  Suspense (with recon):    £${$('suspenseWith').textContent}
+  Suspense (without recon): £${$('suspenseWithout').textContent}
+  Client Account Balance:   £${$('clientAccountBalance').textContent}
+============================================================`;
+    const fallback = () => {
+      const t = document.createElement('textarea');
+      t.value = text; document.body.appendChild(t); t.select();
+      document.execCommand('copy'); document.body.removeChild(t);
+      showToast('Copied. Paste into your go-live chat on the project board.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('Copied. Paste into your go-live chat on the project board.'))
+        .catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+</script>
+</body>
+</html>
